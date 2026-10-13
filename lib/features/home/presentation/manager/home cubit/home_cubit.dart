@@ -55,4 +55,45 @@ class HomeCubit extends Cubit<HomeState> {
       },
     );
   }
+
+  // --- متغيرات وضع التحديد (Multi-Selection) ---
+  bool isSelectionMode = false;
+  List<String> selectedFilesIds = [];
+
+  void enableSelectionMode(String fileId) {
+    isSelectionMode = true;
+    selectedFilesIds.add(fileId);
+    emit(HomeSuccess(List.from(allFiles)));
+  }
+
+  void toggleFileSelection(String fileId) {
+    if (selectedFilesIds.contains(fileId)) {
+      selectedFilesIds.remove(fileId);
+      if (selectedFilesIds.isEmpty) {
+        isSelectionMode = false;
+      }
+    } else {
+      selectedFilesIds.add(fileId);
+    }
+    emit(HomeSuccess(List.from(allFiles)));
+  }
+
+  void clearSelection() {
+    isSelectionMode = false;
+    selectedFilesIds.clear();
+    emit(HomeSuccess(List.from(allFiles)));
+  }
+
+  void selectAll() {
+    selectedFilesIds = allFiles.map((e) => e.id).toList();
+    emit(HomeSuccess(List.from(allFiles)));
+  }
+
+  Future<void> deleteSelectedFiles() async {
+    for (String id in selectedFilesIds) {
+      final fileToDelete = allFiles.firstWhere((file) => file.id == id);
+      await deleteFile(fileToDelete);
+    }
+    clearSelection();
+  }
 }

@@ -9,8 +9,15 @@ import 'package:share_plus/share_plus.dart';
 
 class PdfItemWidget extends StatelessWidget {
   final PdfFileEntity pdfFile;
+  final bool isSelectionMode;
+  final bool isSelected;
 
-  const PdfItemWidget({super.key, required this.pdfFile});
+  const PdfItemWidget({
+    super.key,
+    required this.pdfFile,
+    this.isSelectionMode = false,
+    this.isSelected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +103,10 @@ class PdfItemWidget extends StatelessWidget {
                       ),
                       child: Text(
                         pdfFile.numOfPages.toString(),
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
@@ -118,40 +128,69 @@ class PdfItemWidget extends StatelessWidget {
                   ],
                 ),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        final file = XFile(pdfFile.pdfPath);
-
-                        await SharePlus.instance.share(
-                          ShareParams(files: [file]),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.share,
-                        color: Colors.grey,
-                        size: 22,
+                isSelectionMode
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF5A6BFF)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFF5A6BFF)
+                                    : Colors.grey,
+                                width: 2,
+                              ),
+                            ),
+                            child: isSelected
+                                ? const Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: Colors.white,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              final file = XFile(pdfFile.pdfPath);
+                              await SharePlus.instance.share(
+                                ShareParams(files: [file]),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.share,
+                              color: Colors.grey,
+                              size: 22,
+                            ),
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                          ),
+                          const SizedBox(width: AppSpacing.s24),
+                          IconButton(
+                            onPressed: () {
+                              showFileOptionsBottomSheet(context, pdfFile);
+                            },
+                            icon: const Icon(
+                              Icons.more_vert,
+                              color: Colors.grey,
+                              size: 22,
+                            ),
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
                       ),
-                      constraints: const BoxConstraints(),
-                      padding: EdgeInsets.zero,
-                    ),
-                    const SizedBox(width: AppSpacing.s24),
-                    IconButton(
-                      onPressed: () {
-                        showFileOptionsBottomSheet(context, pdfFile);
-                      },
-                      icon: const Icon(
-                        Icons.more_vert,
-                        color: Colors.grey,
-                        size: 22,
-                      ),
-                      constraints: const BoxConstraints(),
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
