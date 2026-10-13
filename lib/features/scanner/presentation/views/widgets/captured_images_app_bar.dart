@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:scanify_pdf/core/utils/app_router.dart';
 import 'package:scanify_pdf/core/utils/app_spacing.dart';
 import 'package:scanify_pdf/core/utils/styles.dart';
 
@@ -17,7 +18,7 @@ class CapturedImagesAppBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => GoRouter.of(context).pop(),
+            onPressed: () => GoRouter.of(context).go(AppRouter.kHomeView),
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),

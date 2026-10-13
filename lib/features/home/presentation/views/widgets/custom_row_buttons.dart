@@ -41,7 +41,7 @@ class CustomRowButtons extends StatelessWidget {
             },
             child: CustomButton(
               imagePath: 'assets/icons/scan.png',
-              label: 'Smart Scan',
+              label: 'Scan',
               onTap: () {
                 context.read<CameraPermissionCubit>().requestPermission();
               },

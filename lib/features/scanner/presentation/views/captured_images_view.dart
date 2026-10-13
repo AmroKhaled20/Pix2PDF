@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:scanify_pdf/core/utils/app_router.dart';
 import 'package:scanify_pdf/features/scanner/presentation/manager/scanner%20cubit/scanner_cubit.dart';
 import 'package:scanify_pdf/features/scanner/presentation/views/widgets/captured_images_app_bar.dart';
 import 'package:scanify_pdf/features/scanner/presentation/views/widgets/captured_images_grid.dart';
@@ -36,20 +38,27 @@ class _CapturedImagesViewState extends State<CapturedImagesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            CapturedImagesAppBar(isEditMode: widget.fileIdToEdit != null),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
 
-            const Expanded(child: CapturedImagesGrid()),
+        GoRouter.of(context).go(AppRouter.kHomeView);
+      },
 
-            CapturedImagesLowerSection(
-              fileIdToEdit: widget.fileIdToEdit,
-              pdfNameToEdit: widget.pdfNameToEdit,
-            ),
-          ],
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              CapturedImagesAppBar(isEditMode: widget.fileIdToEdit != null),
+              const Expanded(child: CapturedImagesGrid()),
+              CapturedImagesLowerSection(
+                fileIdToEdit: widget.fileIdToEdit,
+                pdfNameToEdit: widget.pdfNameToEdit,
+              ),
+            ],
+          ),
         ),
       ),
     );
