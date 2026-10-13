@@ -6,11 +6,14 @@ import 'package:scanify_pdf/core/utils/app_spacing.dart';
 import 'package:scanify_pdf/core/utils/constants.dart';
 import 'package:scanify_pdf/core/utils/custom_snackbar.dart';
 import 'package:scanify_pdf/core/utils/styles.dart';
-import 'package:scanify_pdf/features/home/presentation/manager/home cubit/home_cubit.dart';
-import 'package:scanify_pdf/features/scanner/presentation/manager/scanner cubit/scanner_cubit.dart';
+import 'package:scanify_pdf/features/home/presentation/manager/home%20cubit/home_cubit.dart';
+import 'package:scanify_pdf/features/scanner/presentation/manager/scanner%20cubit/scanner_cubit.dart';
 
 class SavePdfBottomSheet extends StatefulWidget {
-  const SavePdfBottomSheet({super.key});
+  final String? fileIdToEdit;
+  final String? pdfNameToEdit;
+
+  const SavePdfBottomSheet({super.key, this.fileIdToEdit, this.pdfNameToEdit});
 
   @override
   State<SavePdfBottomSheet> createState() => _SavePdfBottomSheetState();
@@ -24,10 +27,13 @@ class _SavePdfBottomSheetState extends State<SavePdfBottomSheet> {
   void initState() {
     super.initState();
 
-    final now = DateTime.now();
-
-    _defaultName =
-        'Scanify_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour}${now.minute}';
+    if (widget.pdfNameToEdit != null) {
+      _defaultName = widget.pdfNameToEdit!;
+    } else {
+      final now = DateTime.now();
+      _defaultName =
+          'Scanify_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour}${now.minute}';
+    }
 
     _nameController = TextEditingController(text: _defaultName);
   }
@@ -43,15 +49,24 @@ class _SavePdfBottomSheetState extends State<SavePdfBottomSheet> {
     return BlocConsumer<ScannerCubit, ScannerState>(
       listener: (context, state) {
         if (state is ScannerPdfGenerationSuccess) {
-          final router = GoRouter.of(context);
-
           context.read<ScannerCubit>().clearSession();
           context.read<HomeCubit>().fetchSavedFiles();
 
-          CustomSnackbar.showSuccess(context, 'Converted to PDF successfully!');
+          CustomSnackbar.showSuccess(
+            context,
+            widget.fileIdToEdit != null
+                ? 'PDF updated successfully!'
+                : 'Converted to PDF successfully!',
+          );
 
-          router.pop();
-          router.go(AppRouter.kHomeView);
+          if (widget.fileIdToEdit != null) {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          } else {
+            final router = GoRouter.of(context);
+            router.pop();
+            router.go(AppRouter.kHomeView);
+          }
         } else if (state is ScannerPdfGenerationError) {
           CustomSnackbar.showError(context, state.errorMessage);
         }
@@ -75,7 +90,9 @@ class _SavePdfBottomSheetState extends State<SavePdfBottomSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Convert to PDF',
+                      widget.fileIdToEdit != null
+                          ? 'Update PDF'
+                          : 'Convert to PDF',
                       style: Styles.titleMeduim.copyWith(color: Colors.white),
                     ),
                     IconButton(
@@ -128,7 +145,14 @@ class _SavePdfBottomSheetState extends State<SavePdfBottomSheet> {
                             fileName = _defaultName;
                           }
 
-                          context.read<ScannerCubit>().generatePdf(fileName);
+                          if (widget.fileIdToEdit != null) {
+                            context.read<ScannerCubit>().updateExistingPdf(
+                              fileId: widget.fileIdToEdit!,
+                              fileName: fileName,
+                            );
+                          } else {
+                            context.read<ScannerCubit>().generatePdf(fileName);
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
@@ -147,7 +171,7 @@ class _SavePdfBottomSheetState extends State<SavePdfBottomSheet> {
                           ),
                         )
                       : Text(
-                          'CONVERT',
+                          widget.fileIdToEdit != null ? 'UPDATE' : 'CONVERT',
                           style: Styles.textStyle18.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

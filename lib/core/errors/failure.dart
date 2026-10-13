@@ -15,6 +15,10 @@ class PdfGenerationFailure extends Failure {
   PdfGenerationFailure(super.message);
 }
 
+class DatabaseFailure extends Failure {
+  DatabaseFailure(super.message);
+}
+
 class EmptyImagesFailure extends Failure {
   EmptyImagesFailure() : super('Please add at least one image.');
 }

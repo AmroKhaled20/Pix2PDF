@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,10 +38,16 @@ class ScannerControlsWidget extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     if (count > 0) {
-                      GoRouter.of(context).push(
-                        AppRouter.kCapturedImagesView,
-                        extra: context.read<ScannerCubit>(),
-                      );
+                      final currentPath = ModalRoute.of(context)?.settings.name;
+
+                      if (currentPath == AppRouter.kAddMoreCameraView) {
+                        GoRouter.of(context).pop();
+                      } else {
+                        GoRouter.of(context).push(
+                          AppRouter.kCapturedImagesView,
+                          extra: context.read<ScannerCubit>(),
+                        );
+                      }
                     }
                   },
                   child: Container(

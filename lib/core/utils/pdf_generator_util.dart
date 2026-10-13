@@ -55,27 +55,40 @@ class PdfGeneratorUtil {
     }
 
     final filePath = await _getUniqueFilePath(appPdfDir.path, pdfName);
-
     final file = File(filePath);
     await file.writeAsBytes(await pdf.save());
 
     final finalPdfName = filePath.split('/').last.replaceAll('.pdf', '');
 
-    final thumbnailFile = File(imagePaths.first);
-    final savedThumbnailPath = '${appPdfDir.path}/$finalPdfName-thumb.jpg';
+    List<String> persistentImagePaths = [];
+    final uniqueId = DateTime.now().millisecondsSinceEpoch;
 
-    await thumbnailFile.copy(savedThumbnailPath);
+    for (int i = 0; i < imagePaths.length; i++) {
+      final originalFile = File(imagePaths[i]);
+      if (originalFile.existsSync()) {
+        final persistentPath =
+            '${appPdfDir.path}/$finalPdfName\_img_${uniqueId}_$i.jpg';
+        await originalFile.copy(persistentPath);
+        persistentImagePaths.add(persistentPath);
+      }
+    }
+
+    String? savedThumbnailPath;
+    if (persistentImagePaths.isNotEmpty) {
+      savedThumbnailPath = persistentImagePaths.first;
+    }
 
     final fileSizeInBytes = await file.length();
 
     return PdfFileModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: finalPdfName,
-      numOfPages: imagePaths.length,
+      numOfPages: persistentImagePaths.length,
       thumbnailPath: savedThumbnailPath,
       size: '${(fileSizeInBytes / 1024).toStringAsFixed(2)} KB',
       createdAt: DateTime.now(),
       pdfPath: filePath,
+      imagePaths: persistentImagePaths,
     );
   }
 

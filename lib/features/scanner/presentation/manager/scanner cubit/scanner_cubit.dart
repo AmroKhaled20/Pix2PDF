@@ -4,47 +4,42 @@ import 'package:scanify_pdf/features/scanner/domain/entities/scanned_image_entit
 import 'package:scanify_pdf/features/scanner/domain/use_cases/clear_cached_images_use_case.dart';
 import 'package:scanify_pdf/features/scanner/domain/use_cases/generate_and_save_pdf_use_case.dart';
 import 'package:scanify_pdf/features/scanner/domain/use_cases/pick_images_from_gallery_use_case.dart';
+import 'package:scanify_pdf/features/scanner/domain/use_cases/update_existing_pdf_use_case.dart';
 
 part 'scanner_state.dart';
 
 class ScannerCubit extends Cubit<ScannerState> {
-  // بنحقن الـ Use Cases
   final GenerateAndSavePdfUseCase generateAndSavePdfUseCase;
   final ClearCachedImagesUseCase clearCachedImagesUseCase;
   final PickImagesFromGalleryUseCase pickImagesFromGalleryUseCase;
+  final UpdateExistingPdfUseCase updateExistingPdfUseCase;
 
-  // دي اللستة اللي هشيل فيها الصور واليوزر بيصور قبل ما يحولها
   List<ScannedImageEntity> capturedImages = [];
 
   ScannerCubit({
     required this.generateAndSavePdfUseCase,
     required this.clearCachedImagesUseCase,
     required this.pickImagesFromGalleryUseCase,
+    required this.updateExistingPdfUseCase,
   }) : super(ScannerInitial());
 
-  // 1. دالة إضافة صورة جديدة (لما الكاميرا تلقط صورة)
   void addImage(String imagePath) {
     final newImage = ScannedImageEntity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       imagePath: imagePath,
     );
     capturedImages.add(newImage);
-
-    // بعمل List.from عشان فلاتر يحس إن اللستة اتغيرت ويعمل Re-build للشاشة
     emit(ScannerImagesUpdated(images: List.from(capturedImages)));
   }
 
-  // 2. دالة مسح صورة من القائمة (لو اليوزر شاف صورة مهزوزة وعايز يمسحها)
   void removeImage(int index) {
     capturedImages.removeAt(index);
     emit(ScannerImagesUpdated(images: List.from(capturedImages)));
   }
 
-  // 3. دالة تحويل الصور لـ PDF
   Future<void> generatePdf(String pdfName) async {
     emit(ScannerPdfGenerationLoading());
 
-    // بنادي على الـ Use Case اللي إنا حطيت فيها الـ Business Logic
     final result = await generateAndSavePdfUseCase.call(
       GeneratePdfParams(images: capturedImages, pdfName: pdfName),
     );
@@ -56,7 +51,6 @@ class ScannerCubit extends Cubit<ScannerState> {
     );
   }
 
-  // 4. دالة التنظيف (لو اليوزر قفل الشاشة أو بعد ما نخلص تحويل بنجاح)
   Future<void> clearSession() async {
     await clearCachedImagesUseCase.call(
       ClearCacheParams(images: capturedImages),
@@ -67,7 +61,6 @@ class ScannerCubit extends Cubit<ScannerState> {
     }
   }
 
-  // 5. دالة استيراد الصور من الجاليري
   Future<void> pickImagesFromGallery() async {
     final result = await pickImagesFromGalleryUseCase.call();
 
@@ -82,6 +75,42 @@ class ScannerCubit extends Cubit<ScannerState> {
           emit(ScannerImagesUpdated(images: []));
         }
       },
+    );
+  }
+
+  void loadImagesForEditing(List<String> imagePaths) {
+    capturedImages.clear();
+
+    for (var path in imagePaths) {
+      capturedImages.add(
+        ScannedImageEntity(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          imagePath: path,
+        ),
+      );
+    }
+
+    emit(ScannerImagesUpdated(images: List.from(capturedImages)));
+  }
+
+  Future<void> updateExistingPdf({
+    required String fileId,
+    required String fileName,
+  }) async {
+    emit(ScannerPdfGenerationLoading());
+
+    final result = await updateExistingPdfUseCase.call(
+      UpdatePdfParams(
+        images: capturedImages,
+        pdfName: fileName,
+        fileId: fileId,
+      ),
+    );
+
+    result.fold(
+      (failure) =>
+          emit(ScannerPdfGenerationError(errorMessage: failure.message)),
+      (success) => emit(ScannerPdfGenerationSuccess()),
     );
   }
 }

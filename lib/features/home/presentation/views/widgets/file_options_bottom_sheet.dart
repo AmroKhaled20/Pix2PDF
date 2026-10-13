@@ -1,7 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scanify_pdf/core/entities/pdf_file_entity.dart';
+import 'package:scanify_pdf/core/utils/service_locator.dart';
 import 'package:scanify_pdf/features/home/presentation/views/widgets/delete_confirmation_dialog.dart';
+import 'package:scanify_pdf/features/scanner/domain/use_cases/clear_cached_images_use_case.dart';
+import 'package:scanify_pdf/features/scanner/domain/use_cases/generate_and_save_pdf_use_case.dart';
+import 'package:scanify_pdf/features/scanner/domain/use_cases/pick_images_from_gallery_use_case.dart';
+import 'package:scanify_pdf/features/scanner/domain/use_cases/update_existing_pdf_use_case.dart';
+import 'package:scanify_pdf/features/scanner/presentation/manager/scanner%20cubit/scanner_cubit.dart';
+import 'package:scanify_pdf/features/scanner/presentation/views/captured_images_view.dart';
 
 void showFileOptionsBottomSheet(BuildContext context, PdfFileEntity file) {
   showModalBottomSheet(
@@ -96,7 +104,42 @@ void showFileOptionsBottomSheet(BuildContext context, PdfFileEntity file) {
                 'Edit PDF',
                 style: TextStyle(color: Colors.white),
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+
+                if (file.imagePaths.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Cannot edit old files'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BlocProvider(
+                      create: (context) => ScannerCubit(
+                        generateAndSavePdfUseCase: getIt
+                            .get<GenerateAndSavePdfUseCase>(),
+                        clearCachedImagesUseCase: getIt
+                            .get<ClearCachedImagesUseCase>(),
+                        pickImagesFromGalleryUseCase: getIt
+                            .get<PickImagesFromGalleryUseCase>(),
+                        updateExistingPdfUseCase: getIt
+                            .get<UpdateExistingPdfUseCase>(),
+                      ),
+                      child: CapturedImagesView(
+                        initialImages: List.from(file.imagePaths),
+                        fileIdToEdit: file.id,
+                        pdfNameToEdit: file.name,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.grey),
@@ -105,7 +148,6 @@ void showFileOptionsBottomSheet(BuildContext context, PdfFileEntity file) {
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
-                // بنستدعي الديالوج بتاع الحذف ونقفل الـ Bottom Sheet لو حابب
                 showDeleteConfirmationDialog(context, file);
               },
             ),

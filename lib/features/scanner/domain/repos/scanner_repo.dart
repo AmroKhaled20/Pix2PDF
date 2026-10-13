@@ -13,4 +13,10 @@ abstract class ScannerRepo {
   });
 
   Future<Either<Failure, List<ScannedImageEntity>>> pickImagesFromGallery();
+
+  Future<Either<Failure, void>> updateExistingPdf({
+    required List<ScannedImageEntity> images,
+    required String pdfName,
+    required String fileId,
+  });
 }

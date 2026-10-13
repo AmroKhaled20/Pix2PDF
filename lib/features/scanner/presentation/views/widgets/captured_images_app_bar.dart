@@ -4,7 +4,8 @@ import 'package:scanify_pdf/core/utils/app_spacing.dart';
 import 'package:scanify_pdf/core/utils/styles.dart';
 
 class CapturedImagesAppBar extends StatelessWidget {
-  const CapturedImagesAppBar({super.key});
+  final bool isEditMode;
+  const CapturedImagesAppBar({super.key, this.isEditMode = false});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class CapturedImagesAppBar extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.s16),
           Text(
-            'Review Scans',
+            isEditMode ? 'Edit PDF' : 'Review Images',
             style: Styles.titleMeduim.copyWith(color: Colors.black),
           ),
         ],

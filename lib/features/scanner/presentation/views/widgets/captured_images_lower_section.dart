@@ -8,7 +8,14 @@ import 'package:scanify_pdf/features/scanner/presentation/manager/scanner%20cubi
 import 'package:scanify_pdf/features/scanner/presentation/views/widgets/save_pdf_bottom_sheet.dart';
 
 class CapturedImagesLowerSection extends StatelessWidget {
-  const CapturedImagesLowerSection({super.key});
+  final String? fileIdToEdit;
+  final String? pdfNameToEdit;
+
+  const CapturedImagesLowerSection({
+    super.key,
+    this.fileIdToEdit,
+    this.pdfNameToEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,10 @@ class CapturedImagesLowerSection extends StatelessWidget {
             builder: (context) {
               return BlocProvider.value(
                 value: scannerCubit,
-                child: const SavePdfBottomSheet(),
+                child: SavePdfBottomSheet(
+                  fileIdToEdit: fileIdToEdit,
+                  pdfNameToEdit: pdfNameToEdit,
+                ),
               );
             },
           );
@@ -49,7 +59,7 @@ class CapturedImagesLowerSection extends StatelessWidget {
           ),
         ),
         child: Text(
-          'Convert to PDF',
+          fileIdToEdit != null ? 'Update PDF' : 'Convert to PDF',
           style: Styles.textStyle18.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,

@@ -6,6 +6,7 @@ import 'package:scanify_pdf/core/utils/constants.dart';
 abstract class ScannerLocalDataSource {
   Future<void> savePdfMetadata(PdfFileModel pdfFile);
   Future<List<String>> pickImagesFromGallery();
+  PdfFileModel? getPdfById(String id);
 }
 
 class ScannerLocalDataSourceImpl implements ScannerLocalDataSource {
@@ -21,7 +22,16 @@ class ScannerLocalDataSourceImpl implements ScannerLocalDataSource {
     final List<XFile> pickedFiles = await picker.pickMultiImage(
       imageQuality: 100,
     );
-
     return pickedFiles.map((file) => file.path).toList();
+  }
+
+  @override
+  PdfFileModel? getPdfById(String id) {
+    var box = Hive.box(kPdfFilesBox);
+    final data = box.get(id);
+    if (data != null) {
+      return PdfFileModel.fromMap(Map<String, dynamic>.from(data));
+    }
+    return null;
   }
 }

@@ -9,6 +9,7 @@ class PdfFileModel extends PdfFileEntity {
     required super.size,
     required super.createdAt,
     required super.pdfPath,
+    required super.imagePaths,
   });
 
   factory PdfFileModel.fromMap(Map<String, dynamic> map) {
@@ -20,6 +21,9 @@ class PdfFileModel extends PdfFileEntity {
       size: map['size'],
       createdAt: DateTime.parse(map['createdAt']),
       pdfPath: map['pdfPath'] ?? '',
+      imagePaths: map['imagePaths'] != null
+          ? List<String>.from(map['imagePaths'])
+          : [],
     );
   }
 
@@ -32,6 +36,7 @@ class PdfFileModel extends PdfFileEntity {
       'size': size,
       'createdAt': createdAt.toIso8601String(),
       'pdfPath': pdfPath,
+      'imagePaths': imagePaths,
     };
   }
 }

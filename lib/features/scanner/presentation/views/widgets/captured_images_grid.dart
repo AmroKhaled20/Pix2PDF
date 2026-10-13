@@ -57,7 +57,7 @@ class CapturedImagesGrid extends StatelessWidget {
                 icon: Icons.camera_alt_rounded,
                 title: 'Camera',
                 onTap: () {
-                  GoRouter.of(context).replace(
+                  GoRouter.of(context).push(
                     AppRouter.kAddMoreCameraView,
                     extra: context.read<ScannerCubit>(),
                   );
