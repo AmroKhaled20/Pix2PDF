@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scanify_pdf/core/services/permission_service.dart';
 import 'package:scanify_pdf/core/utils/service_locator.dart';
+import 'package:scanify_pdf/features/home/presentation/manager/home%20cubit/home_cubit.dart';
+import 'package:scanify_pdf/features/home/presentation/views/files_view.dart';
 import 'package:scanify_pdf/features/home/presentation/views/home_view.dart';
 import 'package:scanify_pdf/features/scanner/presentation/manager/camera%20permission%20cubit/camera_permission_cubit.dart';
 import 'package:scanify_pdf/features/scanner/presentation/manager/scanner%20cubit/scanner_cubit.dart';
@@ -53,6 +55,7 @@ abstract class AppRouter {
           );
         },
       ),
+      GoRoute(path: kFilesView, builder: (context, state) => const FilesView()),
     ],
   );
 }
